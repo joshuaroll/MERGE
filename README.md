@@ -30,28 +30,33 @@ conda activate cellot_env && python models/chemcpa_wrapper.py
 
 | Model | Source | Status | Notes |
 |-------|--------|--------|-------|
-| PerGeneLinear | MERGE | Best single model | Per-gene ridge regression |
+| PDGrapher | [valence-labs/PDGrapher](https://github.com/valence-labs/pdgrapher) | 109% of paper | GNN on PPI network |
+| PerGeneLinear | MERGE | 2nd best | Per-gene ridge regression |
 | scGen | [theislab/scgen](https://github.com/theislab/scgen) | ~94% of paper | VAE latent arithmetic |
 | ChemCPA | [theislab/chemCPA](https://github.com/theislab/chemCPA) | ~95% of paper | Compositional perturbation autoencoder |
+| MultiDCP | [ICDM-UESTC/MultiDCP](https://github.com/ICDM-UESTC/MultiDCP) | Pretrained | Neural fingerprints + multimodal fusion |
 | Biolord | [nitzanlab/biolord](https://github.com/nitzanlab/biolord) | ~93% of paper | Disentangled representation learning |
 | CellOT | [bunnech/cellot](https://github.com/bunnech/cellot) | Matches paper | Optimal transport with ICNN |
 | NoChange | MERGE | Baseline | Predicts DE = 0 |
 | MeanShift | MERGE | Baseline | Adds mean differential expression |
 
-## Results (A549, fold 0)
+## Results (A549)
 
-### MERGE Models
+### MERGE Models (Trained from Scratch)
 
 ```
-Model                   R² Top-20    R² Top-40    R² Top-80
-PerGeneLinear              0.7636       0.7554       0.7447    <- Best
-ChemCPA                    0.7056       0.6893       0.6680
-scGen                      0.7002       0.6775       0.6582
-Biolord (tuned)            0.6769       0.6442       0.6062
-CellOT_PCA100              0.4603       0.4551       0.4501
-MeanShift                  0.3116       0.3006       0.2976
-CellOT (no PCA)            0.0885         -            -
-NoChange                   0.0000       0.0000       0.0000
+Model                   R² Top-20    R² Top-40    R² Top-80    Fold     Notes
+MultiDCP (retrained)       0.7698       0.7593       0.7494    fold 1   <- Best (trained from scratch)
+PDGrapher (retrained)      0.7666       0.7561       0.7463    fold 1
+PerGeneLinear              0.7636       0.7554       0.7447    fold 0
+ChemCPA                    0.7056       0.6893       0.6680    fold 0
+scGen                      0.7002       0.6775       0.6582    fold 0
+Biolord (tuned)            0.6769       0.6442       0.6062    fold 0
+MultiDCP (pretrained)      0.6537       0.6349       0.6120    fold 0   Uses pretrained weights
+CellOT_PCA100              0.4603       0.4551       0.4501    fold 0
+MeanShift                  0.3116       0.3006       0.2976    fold 0
+CellOT (no PCA)            0.0885         -            -       fold 0
+NoChange                   0.0000       0.0000       0.0000    fold 0
 ```
 
 ### Published Baselines (PDGrapher paper)
@@ -68,10 +73,13 @@ CellOT (paper)             0.0031       0.0035       0.0036
 
 ### Key Findings
 
-1. **PerGeneLinear** achieves state-of-the-art performance (R² = 0.76), exceeding all published baselines
-2. **scGen** and **ChemCPA** reach 94-95% of published performance
-3. **Biolord** benefits significantly from more HVGs (5000 vs 2000: +9.8% improvement)
-4. **CellOT** requires PCA dimensionality reduction for reasonable performance on this task
+1. **MultiDCP (retrained)** achieves the best performance (R² Top-20 = 0.7698), 9.5% higher than paper's reported baseline
+2. **PDGrapher (retrained)** achieves strong performance (R² Top-20 = 0.7666), 9% higher than paper's reported value
+3. **PerGeneLinear** remains highly competitive (R² = 0.7636), nearly matching deep learning models with far simpler architecture
+4. **scGen** and **ChemCPA** reach 94-95% of published performance
+5. **Biolord** benefits significantly from more HVGs (5000 vs 2000: +9.8% improvement)
+6. **CellOT** requires PCA dimensionality reduction for reasonable performance on this task
+7. **MultiDCP (pretrained vs retrained)**: Retraining improves R² Top-20 from 0.6537 to 0.7698 (+17.8%)
 
 ## Evaluation Metrics
 
