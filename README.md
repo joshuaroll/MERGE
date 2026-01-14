@@ -52,9 +52,8 @@ ChemCPA                    0.7056       0.6893       0.6680    fold 0
 scGen                      0.7002       0.6775       0.6582    fold 0
 Biolord (tuned)            0.6769       0.6442       0.6062    fold 0
 MultiDCP (pretrained)      0.6537       0.6349       0.6120    fold 0   Uses pretrained weights
-CellOT_PCA100              0.4603       0.4551       0.4501    fold 0
+CellOT (PCA100)            0.4603       0.4551       0.4501    fold 0
 MeanShift                  0.3116       0.3006       0.2976    fold 0
-CellOT (no PCA)            0.0885         -            -       fold 0
 ```
 
 ### Published Baselines (PDGrapher paper)
@@ -76,8 +75,7 @@ CellOT (paper)             0.0031       0.0035       0.0036
 3. **PerGeneLinear** remains highly competitive (R² = 0.7636), nearly matching deep learning models with far simpler architecture
 4. **scGen** and **ChemCPA** reach 94-95% of published performance
 5. **Biolord** benefits significantly from more HVGs (5000 vs 2000: +9.8% improvement)
-6. **CellOT** requires PCA dimensionality reduction for reasonable performance on this task
-7. **MultiDCP (pretrained vs retrained)**: Retraining improves R² Top-20 from 0.6537 to 0.7698 (+17.8%)
+6. **MultiDCP (pretrained vs retrained)**: Retraining improves R² Top-20 from 0.6537 to 0.7698 (+17.8%)
 
 ## Evaluation Metrics
 
