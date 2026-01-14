@@ -37,7 +37,6 @@ conda activate cellot_env && python models/chemcpa_wrapper.py
 | MultiDCP | [ICDM-UESTC/MultiDCP](https://github.com/ICDM-UESTC/MultiDCP) | Pretrained | Neural fingerprints + multimodal fusion |
 | Biolord | [nitzanlab/biolord](https://github.com/nitzanlab/biolord) | ~93% of paper | Disentangled representation learning |
 | CellOT | [bunnech/cellot](https://github.com/bunnech/cellot) | Matches paper | Optimal transport with ICNN |
-| NoChange | MERGE | Baseline | Predicts DE = 0 |
 | MeanShift | MERGE | Baseline | Adds mean differential expression |
 
 ## Results (A549)
@@ -56,7 +55,6 @@ MultiDCP (pretrained)      0.6537       0.6349       0.6120    fold 0   Uses pre
 CellOT_PCA100              0.4603       0.4551       0.4501    fold 0
 MeanShift                  0.3116       0.3006       0.2976    fold 0
 CellOT (no PCA)            0.0885         -            -       fold 0
-NoChange                   0.0000       0.0000       0.0000    fold 0
 ```
 
 ### Published Baselines (PDGrapher paper)
