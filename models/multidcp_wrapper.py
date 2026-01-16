@@ -78,6 +78,11 @@ class MultiDCPModel(BasePerturbationModel):
     def name(self) -> str:
         return "MultiDCP"
 
+    @property
+    def embedding_dim(self) -> int:
+        """Return embedding dimension (hid_dim from model params)."""
+        return 128  # hid_dim from model parameters
+
     def _setup_paths(self):
         """Add MultiDCP paths to sys.path."""
         for path in [MULTIDCP_SRC, MULTIDCP_MODELS, MULTIDCP_UTILS]:
@@ -237,6 +242,88 @@ class MultiDCPModel(BasePerturbationModel):
         torch.set_default_dtype(original_dtype)
 
         return np.vstack(all_predictions)
+
+    def get_embeddings(self, diseased: np.ndarray,
+                       metadata: Optional[Dict] = None) -> np.ndarray:
+        """
+        Extract embeddings from MultiDCP's intermediate representations.
+
+        Uses the gene-level hidden state aggregated (summed) across genes,
+        similar to how MultiDCPPretraining works.
+
+        Args:
+            diseased: Diseased expression (n_samples, n_genes)
+            metadata: Dict with 'smiles'/'drug_names' and 'dose'
+
+        Returns:
+            Embeddings array (n_samples, hid_dim=128)
+        """
+        if not self._trained:
+            raise RuntimeError("Model must be trained/loaded first")
+
+        if metadata is None:
+            raise ValueError("MultiDCP requires metadata with 'smiles' and 'dose' keys")
+
+        import torch
+        self._setup_paths()
+        import data_utils_pdg as data_utils
+
+        n_samples = diseased.shape[0]
+        smiles_list = metadata.get('smiles', None)
+        drug_names = metadata.get('drug_names', metadata.get('pert_id', None))
+        dose_list = metadata.get('dose', None)
+
+        # Convert drug names to SMILES if needed
+        if smiles_list is None and drug_names is not None:
+            smiles_list = self._convert_drug_names_to_smiles(drug_names)
+        elif smiles_list is not None:
+            if not any(c in str(smiles_list[0]) for c in ['C', 'N', 'O', '(', ')', '=']):
+                smiles_list = self._convert_drug_names_to_smiles(smiles_list)
+
+        if smiles_list is None:
+            raise ValueError("metadata must contain 'smiles', 'drug_names', or 'pert_id' key")
+
+        if dose_list is None:
+            dose_list = ['x'] * n_samples
+
+        batch_size = 32
+        all_embeddings = []
+
+        original_dtype = torch.get_default_dtype()
+        torch.set_default_dtype(torch.float32)
+
+        with torch.no_grad():
+            for start_idx in range(0, n_samples, batch_size):
+                end_idx = min(start_idx + batch_size, n_samples)
+
+                batch_diseased = diseased[start_idx:end_idx]
+                batch_smiles = smiles_list[start_idx:end_idx]
+                batch_dose = dose_list[start_idx:end_idx]
+
+                input_cell_gex = torch.FloatTensor(batch_diseased).to(self.device)
+                drug_features = data_utils.convert_smile_to_feature(batch_smiles, self.device)
+                mask = data_utils.create_mask_feature(drug_features, self.device)
+                dose_tensor = self._encode_dose(batch_dose)
+                gene_features = None
+
+                # Get gene-level hidden states from the internal multidcp module
+                # The model.model is MultiDCP_AE which contains self.multidcp
+                out, cell_hidden = self.model.multidcp(
+                    input_drug=drug_features,
+                    input_gene=gene_features,
+                    mask=mask,
+                    input_cell_gex=input_cell_gex,
+                    input_pert_idose=dose_tensor,
+                )
+                # out = [batch * num_gene * hid_dim]
+
+                # Aggregate across genes (sum, like MultiDCPPretraining)
+                embedding = torch.sum(out, dim=1)  # [batch * hid_dim]
+                all_embeddings.append(embedding.cpu().numpy())
+
+        torch.set_default_dtype(original_dtype)
+
+        return np.vstack(all_embeddings)
 
     def _encode_dose(self, dose_list):
         """Encode dose values as 2-dimensional vector (matching checkpoint)."""

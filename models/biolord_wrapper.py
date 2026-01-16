@@ -40,6 +40,11 @@ class BiolordModel(BasePerturbationModel):
     def name(self) -> str:
         return f"Biolord_lat{self.n_latent}_hvg{self.n_hvg}"
 
+    @property
+    def embedding_dim(self) -> int:
+        """Return embedding dimension (n_latent)."""
+        return self.n_latent
+
     def train(self, diseased: np.ndarray, treated: np.ndarray,
               metadata: Optional[Dict] = None) -> None:
         """
@@ -57,7 +62,7 @@ class BiolordModel(BasePerturbationModel):
         n_samples, n_genes = diseased.shape
 
         # Create gene names if not provided
-        if metadata and 'gene_names' in metadata:
+        if metadata is not None and isinstance(metadata, dict) and 'gene_names' in metadata:
             self._gene_names = metadata['gene_names']
         else:
             self._gene_names = [f"gene_{i}" for i in range(n_genes)]
@@ -187,6 +192,51 @@ class BiolordModel(BasePerturbationModel):
             pred_treated_full[:, hvg_idx] = pred_treated_hvg[:, i]
 
         return pred_treated_full
+
+    def get_embeddings(self, diseased: np.ndarray,
+                       metadata: Optional[Dict] = None) -> np.ndarray:
+        """
+        Extract Biolord latent representations.
+
+        Args:
+            diseased: Diseased expression (n_samples, n_genes)
+            metadata: Optional metadata
+
+        Returns:
+            Embeddings array (n_samples, n_latent)
+        """
+        if not self._trained:
+            raise RuntimeError("Model must be trained first")
+
+        import anndata as ad
+        import scanpy as sc
+        import biolord
+
+        n_samples, n_genes = diseased.shape
+
+        # Create test AnnData with diseased samples (same preprocessing as predict)
+        adata_test = ad.AnnData(X=diseased.copy())
+        adata_test.var_names = self._all_genes
+        adata_test.obs['condition'] = 'diseased'
+        adata_test.obs['condition'] = adata_test.obs['condition'].astype('category')
+
+        sc.pp.normalize_total(adata_test, target_sum=1e4)
+        sc.pp.log1p(adata_test)
+
+        # Keep same HVGs
+        hvg_mask = [g in self._hvg_genes for g in adata_test.var_names]
+        adata_test_hvg = adata_test[:, hvg_mask].copy()
+
+        # Register test AnnData with Biolord
+        biolord.Biolord.setup_anndata(
+            adata_test_hvg,
+            categorical_attributes_keys=['condition'],
+        )
+
+        # Get latent representation
+        latent = self.model.get_latent_representation(adata_test_hvg)
+
+        return latent
 
 
 def train_and_evaluate_biolord(cell_line: str = "A549", fold: int = 0, n_samples: int = 5000,

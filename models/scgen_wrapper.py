@@ -40,6 +40,11 @@ class ScGenModel(BasePerturbationModel):
     def name(self) -> str:
         return "scGen"
 
+    @property
+    def embedding_dim(self) -> int:
+        """Return embedding dimension (n_latent)."""
+        return self.n_latent
+
     def train(self, diseased: np.ndarray, treated: np.ndarray,
               metadata: Optional[Dict] = None) -> None:
         """
@@ -57,7 +62,7 @@ class ScGenModel(BasePerturbationModel):
         n_samples, n_genes = diseased.shape
 
         # Create gene names if not provided
-        if metadata and 'gene_names' in metadata:
+        if metadata is not None and isinstance(metadata, dict) and 'gene_names' in metadata:
             self._gene_names = metadata['gene_names']
         else:
             self._gene_names = [f"gene_{i}" for i in range(n_genes)]
@@ -125,6 +130,38 @@ class ScGenModel(BasePerturbationModel):
             pred_adata = result
 
         return pred_adata.X
+
+    def get_embeddings(self, diseased: np.ndarray,
+                       metadata: Optional[Dict] = None) -> np.ndarray:
+        """
+        Extract VAE latent representations.
+
+        Args:
+            diseased: Diseased expression (n_samples, n_genes)
+            metadata: Optional metadata
+
+        Returns:
+            Embeddings array (n_samples, n_latent)
+        """
+        if not self._trained:
+            raise RuntimeError("Model must be trained first")
+
+        import anndata as ad
+        import scanpy as sc
+
+        # Create test AnnData (same preprocessing as predict)
+        adata_test = ad.AnnData(X=diseased.copy())
+        adata_test.var_names = self._gene_names
+        adata_test.obs['condition'] = 'control'
+        adata_test.obs['cell_type'] = 'cell'
+
+        sc.pp.normalize_total(adata_test, target_sum=1e4)
+        sc.pp.log1p(adata_test)
+
+        # Get latent representation using scvi method
+        latent = self.model.get_latent_representation(adata_test)
+
+        return latent
 
 
 def train_and_evaluate_scgen(cell_line: str = "A549", fold: int = 0, n_samples: int = 5000):

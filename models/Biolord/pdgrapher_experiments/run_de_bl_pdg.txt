@@ -1,0 +1,52 @@
+cd /raid/home/joshua/projects/biolord/pdgrapher_experiments/
+
+python train_bl_pdg_de.py --test_cell A375 --fold 1 --gpu 0 --max_epochs 10
+python train_bl_pdg_de.py --test_cell MCF7 --fold 1 --gpu 0 --max_epochs 10
+python train_bl_pdg_de.py --test_cell A549 --fold 1 --gpu 1 --max_epochs 10
+python train_bl_pdg_de.py --test_cell HT29 --fold 1 --gpu 2 --max_epochs 10
+python train_bl_pdg_de.py --test_cell PC3 --fold 1 --gpu 3 --max_epochs 10
+python train_bl_pdg_de.py --test_cell VCAP --fold 1 --gpu 4 --max_epochs 10
+python train_bl_pdg_de.py --test_cell HELA --fold 1 --gpu 5 --max_epochs 10
+python train_bl_pdg_de.py --test_cell MDAMB231 --fold 1 --gpu 6 --max_epochs 10
+python train_bl_pdg_de.py --test_cell BT20 --fold 1 --gpu 7 --max_epochs 100
+
+# With explicit paths
+python train_bl_pdg_de.py \
+    --test_cell A375 \
+    --fold 1 \
+    --gpu 0 \
+    --treated_pickle /raid/home/public/chemoe_collab_102025/PDGrapher/data/full_downloads/chemical/real_lognorm/chemical_PDGrapher_df_10302025.pkl \
+    --diseased_pickle /raid/home/public/chemoe_collab_102025/PDGrapher/data/full_downloads/chemical/real_lognorm/chemical_PDGrapher_diseased_df_10302025.pkl
+```
+# All cell types in PDGrapher
+ALL_CELL_TYPES = [
+    'A375',
+    'A549', 
+    'HT29',
+    'MCF7',
+    'PC3',
+    'VCAP',
+    'HELA',
+    'MDAMB231',
+    'BT20',
+]
+
+
+## What This Fixes
+
+| Before | After |
+|--------|-------|
+| Top-k by highest expression | Top-k by highest `|treated - diseased|` |
+| R² on raw expression values | R² on differential expression |
+| Selecting housekeeping genes | Selecting actual DEGs |
+| Low R² (~0.1-0.3) | Should match expected (~0.7) |
+
+The output will show something like:
+```
+SUMMARY: TOP-K DEG R² (from Pearson²) - DIFFERENTIAL EXPRESSION
+======================================================================
+K        Train           Val            Test
+----------------------------------------------------------------------
+Top-20          0.7234          0.6891          0.6756
+Top-40          0.6543          0.6234          0.6123
+Top-80          0.5987          0.5678          0.5543

@@ -155,6 +155,25 @@ class SimpleChemCPA(nn.Module):
         with torch.no_grad():
             return self.forward(diseased, drug_idx, dosage, cell_type_idx)
 
+    def get_embedding(self, diseased, drug_idx, dosage, cell_type_idx):
+        """Extract embedding (perturbed latent before decoder)."""
+        self.eval()
+        with torch.no_grad():
+            # Encode diseased expression
+            latent = self.gene_encoder(diseased)
+
+            # Encode drug perturbation
+            drug_latent = self.drug_encoder(drug_idx, dosage)
+
+            # Cell type embedding
+            cell_emb = self.cell_type_embedding(cell_type_idx)
+
+            # Combine to get perturbed latent (this is the embedding)
+            combined = torch.cat([latent, drug_latent, cell_emb], dim=-1)
+            perturbed_latent = self.combiner(combined)
+
+            return perturbed_latent
+
 
 class ChemCPAModel(BasePerturbationModel):
     """
@@ -178,6 +197,11 @@ class ChemCPAModel(BasePerturbationModel):
     @property
     def name(self) -> str:
         return "ChemCPA"
+
+    @property
+    def embedding_dim(self) -> int:
+        """Return embedding dimension (latent_dim)."""
+        return self.latent_dim
 
     def train(self, diseased: np.ndarray, treated: np.ndarray,
               metadata: Optional[Dict] = None) -> None:
@@ -212,12 +236,24 @@ class ChemCPAModel(BasePerturbationModel):
         self._cell_type_to_idx = {c: i for i, c in enumerate(unique_cell_types)}
         cell_type_indices = np.array([self._cell_type_to_idx[c] for c in cell_types])
 
-        # Doses
+        # Doses - handle non-numeric values
         doses = metadata.get('dose')
         if doses is None:
             doses = np.ones(n_samples)
         if isinstance(doses, list):
             doses = np.array(doses)
+        # Convert to numeric, replacing non-numeric values with 1.0
+        try:
+            doses = doses.astype(np.float32)
+        except (ValueError, TypeError):
+            # Handle string doses by using default value
+            numeric_doses = []
+            for d in doses:
+                try:
+                    numeric_doses.append(float(d))
+                except (ValueError, TypeError):
+                    numeric_doses.append(1.0)
+            doses = np.array(numeric_doses, dtype=np.float32)
 
         # Create dataset and dataloader
         dataset = SimpleChemCPADataset(
@@ -301,11 +337,22 @@ class ChemCPAModel(BasePerturbationModel):
             doses = np.ones(n_samples)
         if isinstance(doses, list):
             doses = np.array(doses)
+        # Convert to numeric, replacing non-numeric values with 1.0
+        try:
+            doses = doses.astype(np.float32)
+        except (ValueError, TypeError):
+            numeric_doses = []
+            for d in doses:
+                try:
+                    numeric_doses.append(float(d))
+                except (ValueError, TypeError):
+                    numeric_doses.append(1.0)
+            doses = np.array(numeric_doses, dtype=np.float32)
 
         # Convert to tensors
         diseased_t = torch.FloatTensor(diseased).to(self.device)
         drug_idx_t = torch.LongTensor(drug_indices).to(self.device)
-        dosage_t = torch.FloatTensor(doses.astype(np.float32)).to(self.device)
+        dosage_t = torch.FloatTensor(doses).to(self.device)
         cell_type_idx_t = torch.LongTensor(cell_type_indices).to(self.device)
 
         # Predict
@@ -314,6 +361,68 @@ class ChemCPAModel(BasePerturbationModel):
             pred = self.model(diseased_t, drug_idx_t, dosage_t, cell_type_idx_t)
 
         return pred.cpu().numpy()
+
+    def get_embeddings(self, diseased: np.ndarray,
+                       metadata: Optional[Dict] = None) -> np.ndarray:
+        """
+        Extract embeddings (perturbed latent representations).
+
+        Args:
+            diseased: Diseased expression (n_samples, n_genes)
+            metadata: Dict with 'smiles', 'dose', 'cell_type'
+
+        Returns:
+            Embeddings array (n_samples, latent_dim)
+        """
+        if not self._trained:
+            raise RuntimeError("Model must be trained first")
+
+        n_samples = len(diseased)
+
+        if metadata is None:
+            metadata = {}
+
+        # Get indices using saved mappings (same as predict)
+        smiles = metadata.get('smiles')
+        if smiles is None:
+            smiles = ['drug_0'] * n_samples
+        drug_indices = np.array([
+            self._drug_to_idx.get(s, 0) for s in smiles
+        ])
+
+        cell_types = metadata.get('cell_type')
+        if cell_types is None:
+            cell_types = ['cell_0'] * n_samples
+        cell_type_indices = np.array([
+            self._cell_type_to_idx.get(c, 0) for c in cell_types
+        ])
+
+        doses = metadata.get('dose')
+        if doses is None:
+            doses = np.ones(n_samples)
+        if isinstance(doses, list):
+            doses = np.array(doses)
+        try:
+            doses = doses.astype(np.float32)
+        except (ValueError, TypeError):
+            numeric_doses = []
+            for d in doses:
+                try:
+                    numeric_doses.append(float(d))
+                except (ValueError, TypeError):
+                    numeric_doses.append(1.0)
+            doses = np.array(numeric_doses, dtype=np.float32)
+
+        # Convert to tensors
+        diseased_t = torch.FloatTensor(diseased).to(self.device)
+        drug_idx_t = torch.LongTensor(drug_indices).to(self.device)
+        dosage_t = torch.FloatTensor(doses).to(self.device)
+        cell_type_idx_t = torch.LongTensor(cell_type_indices).to(self.device)
+
+        # Get embeddings
+        embeddings = self.model.get_embedding(diseased_t, drug_idx_t, dosage_t, cell_type_idx_t)
+
+        return embeddings.cpu().numpy()
 
 
 def train_and_evaluate_chemcpa(cell_line: str = "A549", fold: int = 0, n_samples: int = 5000):

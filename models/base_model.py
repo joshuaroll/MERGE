@@ -59,6 +59,30 @@ class BasePerturbationModel(ABC):
         """
         pass
 
+    def get_embeddings(self, diseased: np.ndarray,
+                       metadata: Optional[Dict] = None) -> np.ndarray:
+        """
+        Extract embeddings/latent representations from the model.
+
+        This is used for embedding-level stacking ensembles where
+        intermediate representations are combined rather than final outputs.
+
+        Args:
+            diseased: Diseased expression array (n_samples, n_genes)
+            metadata: Optional metadata dict
+
+        Returns:
+            Embeddings array (n_samples, embedding_dim)
+            Returns None if model doesn't support embedding extraction
+        """
+        # Default implementation returns None (not supported)
+        return None
+
+    @property
+    def embedding_dim(self) -> Optional[int]:
+        """Return the embedding dimension, or None if not supported."""
+        return None
+
     @property
     def is_trained(self) -> bool:
         return self._trained
