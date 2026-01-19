@@ -9,6 +9,6 @@ adapted for PDGrapher data, featuring:
 - Load balancing loss to prevent expert collapse
 """
 
-from .model import CheMoE_PDG
+from .model import CheMoE_PDG, CELL_LINE_TO_IDX, IDX_TO_CELL_LINE
 
-__all__ = ['CheMoE_PDG']
+__all__ = ['CheMoE_PDG', 'CELL_LINE_TO_IDX', 'IDX_TO_CELL_LINE']
