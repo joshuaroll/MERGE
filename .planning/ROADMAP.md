@@ -63,20 +63,31 @@
 
 ### Phase 5: CheMoE PDGrapher Adaptation
 **Goal**: Adapt original CheMoE model to work with PDGrapher's 10,716-gene data
-**Scope**: Create wrapper/training script, train all 9 cell lines fold 1
-**Status**: Pending
+**Scope**: Create wrapper/training script, train all 9 cell lines fold 0
+**Status**: Complete
 **Source**: `/raid/home/joshua/projects/CheMoE`
+**Plans:** 3 plans
+**Completed**: 2026-01-19
+
+Plans:
+- [x] 05-01-PLAN.md — Create CheMoE_PDG model (model.py, __init__.py)
+- [x] 05-02-PLAN.md — Create training script (train_chemoe_pdg.py)
+- [x] 05-03-PLAN.md — Train all 9 cell lines and collect results
 
 **Deliverables**:
-- [ ] CheMoE wrapper adapted for 10,716 genes (like TranSiGen adaptation)
-- [ ] Training script `train_chemoe_pdg.py` created
-- [ ] All 9 cell lines trained (fold 1)
-- [ ] Results extracted with TopKEvaluator
+- [x] CheMoE wrapper adapted for 10,716 genes (like TranSiGen adaptation)
+- [x] Training script `train_chemoe_pdg.py` created
+- [x] All 9 cell lines trained (fold 0)
+- [x] Results extracted with TopKEvaluator
+
+**Results**: Mean R² Top-20: 0.6555 (fold 0)
 
 **Notes**:
 - Original CheMoE uses 978 genes (L1000), needs adaptation to 10,716
 - Uses MoE architecture: 4 experts, top-k=2 sparse routing
-- Input: SMILES (Morgan FP), dose, cell, basal expression → DE prediction
+- Input: SMILES (KPGT or Morgan FP), cell embedding, basal expression → DE prediction
+- No dose encoder (PDGrapher has no dose variation)
+- Trained on fold 0; other baselines use fold 1 — retraining recommended for proper comparison
 
 ---
 
@@ -122,7 +133,7 @@ Integrate new CheMoE-style MoE variant into baseline comparison.
 | TranSiGen_MoE_Balanced | 9/9 | Complete |
 | Biolord | 9/9 | Complete |
 | PDGrapher | 4/9 | Phase 3 |
-| CheMoE | 0/9 | Phase 5 |
+| CheMoE | 9/9 | Complete |
 
 ---
 
