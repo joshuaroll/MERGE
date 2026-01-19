@@ -2,7 +2,7 @@
 
 ## Current Focus
 **Milestone**: M1 - Complete Fold 1 Baseline Evaluation
-**Phase**: Phase 5 - CheMoE PDGrapher Adaptation
+**Phase**: Phase 5 - CheMoE PDGrapher Adaptation (COMPLETE)
 
 ## Progress Summary
 | Phase | Status | Description |
@@ -11,16 +11,16 @@
 | Phase 2 | Complete | Biolord metrics extracted (9/9 cells) |
 | Phase 3 | In Progress | PDGrapher - A549 trained, 8 cells need training |
 | Phase 4 | Complete | Results consolidated to fold1 CSV |
-| Phase 5 | In Progress | CheMoE_PDG - Plan 02 complete (training script) |
+| Phase 5 | Complete | CheMoE_PDG - All 9 cells trained (fold 0) |
 
 ## Phase 5 Progress
 | Plan | Status | Description |
 |------|--------|-------------|
 | 05-01 | Complete | CheMoE_PDG model architecture (5.5M params) |
 | 05-02 | Complete | Training script with DE metrics and WandB |
-| 05-03 | Pending | Train all 9 cells, extract metrics |
+| 05-03 | Complete | Train all 9 cells, extract metrics |
 
-Progress: [####------] 67% (2/3 plans)
+Progress: [##########] 100% (3/3 plans)
 
 ## Model Status (Fold 1)
 | Model | A549 | A375 | BT20 | HELA | HT29 | MCF7 | MDAMB231 | PC3 | VCAP | Mean R2 Top-20 |
@@ -31,16 +31,17 @@ Progress: [####------] 67% (2/3 plans)
 | ChemCPA | v | v | v | v | v | v | v | v | v | 0.7460 |
 | TranSiGen_MoE_Sparse | v | v | v | v | v | v | v | v | v | 0.7454 |
 | TranSiGen | v | v | v | v | v | v | v | v | v | 0.6720 |
+| CheMoE_PDG | v | v | v | v | v | v | v | v | v | 0.6555* |
 | TranSiGen_MoE_Balanced | v | v | v | v | v | v | v | v | v | 0.6013 |
 | scGen | v | v | v | v | v | v | v | v | v | 0.5701 |
-| PDGrapher | - | - | - | - | - | v | v | v | v | 0.7689* |
-| CheMoE_PDG | - | - | - | - | - | - | - | - | - | pending |
+| PDGrapher | - | - | - | - | - | v | v | v | v | 0.7689** |
 
 Legend: v = in CSV, ? = trained but needs evaluation, - = not trained
-*PDGrapher mean based on 4 cells only (MCF7, MDAMB231, PC3, VCAP)
+*CheMoE_PDG trained on fold 0 (not fold 1)
+**PDGrapher mean based on 4 cells only (MCF7, MDAMB231, PC3, VCAP)
 
 ## Results File
-`data/topk_r2_results_fold1_01172026.csv` - 76 results (8 models x 9 cells + 4 PDGrapher)
+`data/topk_r2_results.csv` - 85 results (9 models x 9 cells + 4 PDGrapher)
 
 ## Decisions Made
 | ID | Decision | Phase | Rationale |
@@ -49,23 +50,24 @@ Legend: v = in CSV, ? = trained but needs evaluation, - = not trained
 | gene-aware-experts | Shared MLP + gene embeddings | 05-01 | Parameter efficient (5.5M vs ~60B) |
 | sparse-gating | Top-k=2 with softmax over selected | 05-01 | Matches CheMoE original |
 | mse-plus-aux-loss | MSE + 0.01 * load balancing loss | 05-02 | Direct prediction + expert diversity |
+| fold-0-training | Used fold 0 for CheMoE | 05-03 | Plan specified fold 0 |
 
 ## Session Continuity
-- **Last session:** 2026-01-19T05:10Z
-- **Stopped at:** Completed 05-02-PLAN.md
-- **Resume file:** .planning/phases/05-chemoe-pdg-adaptation/05-03-PLAN.md
+- **Last session:** 2026-01-19T10:00Z
+- **Stopped at:** Completed 05-03-PLAN.md
+- **Resume file:** None (Phase 5 complete)
 
 ## Last Updated
 2026-01-19
 
 ## Next Actions
-1. Execute 05-03-PLAN.md: Train all 9 cell lines, extract metrics
-2. Complete PDGrapher training for 5 remaining cell lines
+1. Complete PDGrapher training for 5 remaining cell lines (A375, A549, BT20, HELA, HT29)
+2. Consider retraining CheMoE on fold 1 for proper baseline comparison
 
 ## Completed This Session
-- Created train_chemoe_pdg.py training pipeline
-- Verified training with 2-epoch dry run on MCF7 fold 0
-- Loss decreased from 0.0375 to 0.0220 (41% reduction)
-- R2 Top-20 = 0.69 after 2 epochs
-- Results saved to shared CSV successfully
-- Created 05-02-SUMMARY.md
+- Trained CheMoE_PDG on all 9 cell lines (fold 0)
+- Fixed numpy/scipy environment compatibility issues
+- Results saved to shared CSV (mean R2 Top-20: 0.6555)
+- Model checkpoints saved in trained_models/chemoe_kpgt_*_fold0/
+- Created 05-03-SUMMARY.md
+- Phase 5 complete
