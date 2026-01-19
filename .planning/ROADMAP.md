@@ -2,10 +2,10 @@
 
 ## Current Milestone: M1 - Complete Fold 1 Baseline Evaluation
 
-**Goal**: Achieve complete fold 1 evaluation results for all 9 models across all 9 cell lines with consistent top-k R² metrics.
+**Goal**: Achieve complete fold 1 evaluation results for all 10 models across all 9 cell lines with consistent top-k R² metrics.
 
 **Success Criteria**:
-- All 9 models evaluated with TopKEvaluator methodology
+- All 10 models evaluated with TopKEvaluator methodology
 - Results consolidated in `data/topk_r2_results_fold1_01172026.csv`
 - Model naming standardized (PascalCase)
 
@@ -52,12 +52,31 @@
 ### Phase 4: Results Consolidation
 **Goal**: Merge all results into final CSV with standardized naming
 **Scope**: Data consolidation, validation, and formatting
-**Status**: Pending (blocked by Phase 1, 3)
+**Status**: Pending (blocked by Phase 1, 3, 5)
 
 **Deliverables**:
-- [ ] All 81 model×cell combinations in CSV (9 models × 9 cells)
+- [ ] All 90 model×cell combinations in CSV (10 models × 9 cells)
 - [ ] Naming verified (PascalCase)
 - [ ] Metrics verified against TopKEvaluator standard
+
+---
+
+### Phase 5: CheMoE PDGrapher Adaptation
+**Goal**: Adapt original CheMoE model to work with PDGrapher's 10,716-gene data
+**Scope**: Create wrapper/training script, train all 9 cell lines fold 1
+**Status**: Pending
+**Source**: `/raid/home/joshua/projects/CheMoE`
+
+**Deliverables**:
+- [ ] CheMoE wrapper adapted for 10,716 genes (like TranSiGen adaptation)
+- [ ] Training script `train_chemoe_pdg.py` created
+- [ ] All 9 cell lines trained (fold 1)
+- [ ] Results extracted with TopKEvaluator
+
+**Notes**:
+- Original CheMoE uses 978 genes (L1000), needs adaptation to 10,716
+- Uses MoE architecture: 4 experts, top-k=2 sparse routing
+- Input: SMILES (Morgan FP), dose, cell, basal expression → DE prediction
 
 ---
 
@@ -65,13 +84,15 @@
 
 ```
 Phase 1 (TranSiGen) ──┐
-                      ├──► Phase 4 (Consolidation)
-Phase 2 (Biolord) ────┤
                       │
-Phase 3 (PDGrapher) ──┘
+Phase 2 (Biolord) ────┼──► Phase 4 (Consolidation)
+                      │
+Phase 3 (PDGrapher) ──┤
+                      │
+Phase 5 (CheMoE) ─────┘
 ```
 
-Phases 1-3 can run in parallel. Phase 4 depends on all three completing.
+Phases 1, 3, 5 can run in parallel. Phase 4 depends on all completing.
 
 ---
 
@@ -101,6 +122,7 @@ Integrate new CheMoE-style MoE variant into baseline comparison.
 | TranSiGen_MoE_Balanced | 9/9 | Complete |
 | Biolord | 9/9 | Complete |
 | PDGrapher | 4/9 | Phase 3 |
+| CheMoE | 0/9 | Phase 5 |
 
 ---
 
