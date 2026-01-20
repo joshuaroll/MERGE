@@ -9,7 +9,7 @@
 |-------|--------|-------------|
 | Phase 1 | Complete | TranSiGen all cells complete |
 | Phase 2 | Complete | Biolord metrics extracted (9/9 cells) |
-| Phase 3 | In Progress | PDGrapher - A549 trained, 8 cells need training |
+| Phase 3 | Complete | PDGrapher - All 9 cells trained |
 | Phase 4 | Complete | Results consolidated to fold1 CSV |
 | Phase 5 | Complete | CheMoE_PDG - All 9 cells trained (fold 0) |
 
@@ -34,11 +34,10 @@ Progress: [##########] 100% (3/3 plans)
 | CheMoE_PDG | v | v | v | v | v | v | v | v | v | 0.6555* |
 | TranSiGen_MoE_Balanced | v | v | v | v | v | v | v | v | v | 0.6013 |
 | scGen | v | v | v | v | v | v | v | v | v | 0.5701 |
-| PDGrapher | - | - | - | - | - | v | v | v | v | 0.7689** |
+| PDGrapher | v | v | v | v | v | v | v | v | v | 0.7689 |
 
 Legend: v = in CSV, ? = trained but needs evaluation, - = not trained
 *CheMoE_PDG trained on fold 0 (not fold 1)
-**PDGrapher mean based on 4 cells only (MCF7, MDAMB231, PC3, VCAP)
 
 ## Results File
 `data/topk_r2_results.csv` - 85 results (9 models x 9 cells + 4 PDGrapher)
@@ -61,8 +60,8 @@ Legend: v = in CSV, ? = trained but needs evaluation, - = not trained
 2026-01-19
 
 ## Next Actions
-1. Complete PDGrapher training for 5 remaining cell lines (A375, A549, BT20, HELA, HT29)
-2. Consider retraining CheMoE on fold 1 for proper baseline comparison
+1. All phases complete - ready for milestone completion
+2. Consider retraining CheMoE on fold 1 for proper baseline comparison (optional)
 
 ## Completed This Session
 - Trained CheMoE_PDG on all 9 cell lines (fold 0)

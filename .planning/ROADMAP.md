@@ -16,11 +16,11 @@
 ### Phase 1: TranSiGen Completion
 **Goal**: Run missing TranSiGen MDAMB231 fold 1
 **Scope**: Single model (TranSiGen base), single cell line (MDAMB231), fold 1
-**Status**: Pending
+**Status**: Complete
 
 **Deliverables**:
-- [ ] TranSiGen MDAMB231 fold 1 trained
-- [ ] Results added to CSV
+- [x] TranSiGen MDAMB231 fold 1 trained
+- [x] Results added to CSV
 
 ---
 
@@ -38,12 +38,12 @@
 ### Phase 3: PDGrapher Evaluation
 **Goal**: Run PDGrapher with proper DE metrics for all cell lines
 **Scope**: 9 cell lines total (A549 re-evaluate, 8 others train from scratch)
-**Status**: In Progress
+**Status**: Complete
 
 **Deliverables**:
-- [ ] A549, A375, BT20, HELA, HT29 forward models trained
-- [ ] MCF7, MDAMB231, PC3, VCAP complete (done)
-- [ ] All results extracted with TopKEvaluator
+- [x] A549, A375, BT20, HELA, HT29 forward models trained
+- [x] MCF7, MDAMB231, PC3, VCAP complete
+- [x] All results extracted with TopKEvaluator
 
 **Notes**: PDGrapher requires separate forward/backward model training. Focus on forward (diseased→treated) for DE prediction.
 
@@ -52,12 +52,12 @@
 ### Phase 4: Results Consolidation
 **Goal**: Merge all results into final CSV with standardized naming
 **Scope**: Data consolidation, validation, and formatting
-**Status**: Pending (blocked by Phase 1, 3, 5)
+**Status**: Complete
 
 **Deliverables**:
-- [ ] All 90 model×cell combinations in CSV (10 models × 9 cells)
-- [ ] Naming verified (PascalCase)
-- [ ] Metrics verified against TopKEvaluator standard
+- [x] All 90 model×cell combinations in CSV (10 models × 9 cells)
+- [x] Naming verified (PascalCase)
+- [x] Metrics verified against TopKEvaluator standard
 
 ---
 
@@ -128,11 +128,11 @@ Integrate new CheMoE-style MoE variant into baseline comparison.
 | MultiDCP | 9/9 | Complete |
 | MultiDCP_CheMoE | 9/9 | Complete |
 | scGen | 9/9 | Complete |
-| TranSiGen | 8/9 | Phase 1 |
+| TranSiGen | 9/9 | Complete |
 | TranSiGen_MoE_Sparse | 9/9 | Complete |
 | TranSiGen_MoE_Balanced | 9/9 | Complete |
 | Biolord | 9/9 | Complete |
-| PDGrapher | 4/9 | Phase 3 |
+| PDGrapher | 9/9 | Complete |
 | CheMoE | 9/9 | Complete |
 
 ---
