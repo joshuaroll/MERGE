@@ -5,60 +5,60 @@
 See: .planning/PROJECT.md (updated 2026-01-19)
 
 **Core value:** Standardized, reproducible baseline comparisons
-**Current focus:** v1.0 complete — ready for next milestone
+**Current focus:** v2.0 Ensemble Architecture — beat Biolord with ensemble
 
 ## Current Position
 
-**Milestone:** v1.0 Complete
-**Phase:** Ready for M2 planning
-**Status:** Milestone shipped
+**Milestone:** v2.0 Ensemble Architecture
+**Phase:** Research complete, ready for Phase 1
+**Status:** Active
 
-Last activity: 2026-01-19 — v1.0 milestone complete
+Last activity: 2026-01-19 — research complete
 
-Progress: [##########] 100% (5/5 phases)
+Progress: [          ] 0% (0/5 phases)
 
-## v1.0 Summary
+## v2.0 Goal
 
-All 10 models evaluated across 9 cell lines:
+Build ensemble models combining all 10 baseline models to beat Biolord (0.7957 R² Top-20)
 
-| Model | Mean R² Top-20 |
-|-------|----------------|
-| Biolord | **0.7957** |
-| MultiDCP | 0.7694 |
-| PDGrapher | 0.7689 |
-| MultiDCP_CheMoE | 0.7601 |
-| ChemCPA | 0.7460 |
-| TranSiGen_MoE_Sparse | 0.7454 |
-| TranSiGen | 0.6720 |
-| CheMoE_PDG* | 0.6555 |
-| TranSiGen_MoE_Balanced | 0.6013 |
-| scGen | 0.5701 |
+## Phase Status
 
-*fold 0
+| Phase | Name | Status |
+|-------|------|--------|
+| 1 | Simple Ensemble Baselines | Pending |
+| 2 | OOF Prediction Generation | Pending |
+| 3 | Stacked Meta-Learners | Pending |
+| 4 | Comparison Table & Evaluation | Pending |
+| 5 | Embedding Stacking (Optional) | Pending |
 
-## Results File
+## v1.0 Summary (Archived)
 
-`data/topk_r2_results.csv` — 124 results (10 models × 9 cells + extras)
+All 10 models evaluated. Top 3:
+1. **Biolord: 0.7957** (target to beat)
+2. MultiDCP: 0.7694
+3. PDGrapher: 0.7689
 
-## Decisions Made (v1.0)
+Full rankings in `.planning/milestones/v1.0-ROADMAP.md`
 
-| ID | Decision | Outcome |
-|----|----------|---------|
-| metric-standard | TopKEvaluator (Pearson² on DE) | ✓ Consistent |
-| output-location | Single CSV | ✓ Consolidated |
-| chemoe-architecture | 4 experts, top-k=2 | ✓ Working |
+## Key Decisions (v2.0)
+
+| ID | Decision | Rationale |
+|----|----------|-----------|
+| meta-learner | Ridge/RidgeCV | Native multi-output, 0.15s |
+| oof-folds | 3 folds | User specified |
+| embedding-stacking | Optional | Explore, don't commit |
 
 ## Session Continuity
 
 - **Last session:** 2026-01-19
-- **Completed:** v1.0 milestone
+- **Completed:** v2.0 research phase
 - **Resume file:** None
 
 ## Next Actions
 
-1. `/gsd:new-milestone` — start M2 (Fold 2-5 Expansion)
-2. Consider retraining CheMoE on fold 1 for proper comparison
+1. `/gsd:plan-phase 1` — plan Simple Ensemble Baselines
+2. Alternatively: start Phase 2 (OOF Generation) in parallel
 
 ## Last Updated
 
-2026-01-19 — v1.0 milestone shipped
+2026-01-19 — v2.0 research complete, roadmap created
